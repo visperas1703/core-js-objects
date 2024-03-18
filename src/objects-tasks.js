@@ -20,7 +20,6 @@
 function shallowCopy(/* obj */) {
   throw new Error('Not implemented');
 }
-
 /**
  * Merges array of objects into a single object. If there are overlapping keys, the values
  * should be summed.
@@ -126,8 +125,8 @@ function isEmptyObject(obj) {
  *    immutableObj.newProp = 'new';
  *    console.log(immutableObj) => {a: 1, b: 2}
  */
-function makeImmutable(/* obj */) {
-  throw new Error('Not implemented');
+function makeImmutable(obj) {
+  return Object.freeze(obj);
 }
 
 /**
@@ -140,8 +139,21 @@ function makeImmutable(/* obj */) {
  *    makeWord({ a: [0, 1], b: [2, 3], c: [4, 5] }) => 'aabbcc'
  *    makeWord({ H:[0], e: [1], l: [2, 3, 8], o: [4, 6], W:[5], r:[7], d:[9]}) => 'HelloWorld'
  */
-function makeWord(/* lettersObject */) {
-  throw new Error('Not implemented');
+function makeWord(lettersObject) {
+  const lettersArray = [];
+
+  Object.keys(lettersObject).forEach((letter) => {
+    const positions = lettersObject[letter];
+    positions.forEach((position) => {
+      lettersArray.push({ letter, position });
+    });
+  });
+
+  lettersArray.sort((a, b) => a.position - b.position);
+
+  const word = lettersArray.map((item) => item.letter).join('');
+
+  return word;
 }
 
 /**
@@ -158,8 +170,34 @@ function makeWord(/* lettersObject */) {
  *    sellTickets([25, 25, 50]) => true
  *    sellTickets([25, 100]) => false (The seller does not have enough money to give change.)
  */
-function sellTickets(/* queue */) {
-  throw new Error('Not implemented');
+function sellTickets(queue) {
+  let bills25 = 0;
+  let bills50 = 0;
+
+  return queue.every((payment) => {
+    if (payment === 25) {
+      bills25 += 1;
+      return true;
+    }
+    if (payment === 50) {
+      if (bills25 < 1) {
+        return false;
+      }
+      bills25 -= 1;
+      bills50 += 1;
+      return true;
+    }
+    if (bills25 >= 1 && bills50 >= 1) {
+      bills25 -= 1;
+      bills50 -= 1;
+      return true;
+    }
+    if (bills25 >= 3) {
+      bills25 -= 3;
+      return true;
+    }
+    return false;
+  });
 }
 
 /**
@@ -175,9 +213,14 @@ function sellTickets(/* queue */) {
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
 }
+
+Rectangle.prototype.getArea = function calculateArea() {
+  return this.width * this.height;
+};
 
 /**
  * Returns the JSON representation of specified object
@@ -189,8 +232,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 /**
@@ -204,8 +247,14 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const obj = Object.create(proto);
+
+  const jsonObj = JSON.parse(json);
+
+  Object.assign(obj, jsonObj);
+
+  return obj;
 }
 
 /**
@@ -234,8 +283,15 @@ function fromJSON(/* proto, json */) {
  *      { country: 'Russia',  city: 'Saint Petersburg' }
  *    ]
  */
-function sortCitiesArray(/* arr */) {
-  throw new Error('Not implemented');
+function sortCitiesArray(arr) {
+  return arr.sort((a, b) => {
+    const countryComparison = a.country.localeCompare(b.country);
+    if (countryComparison !== 0) {
+      return countryComparison;
+    }
+
+    return a.city.localeCompare(b.city);
+  });
 }
 
 /**
@@ -268,8 +324,18 @@ function sortCitiesArray(/* arr */) {
  *    "Poland" => ["Lodz"]
  *   }
  */
-function group(/* array, keySelector, valueSelector */) {
-  throw new Error('Not implemented');
+function group(array, keySelector, valueSelector) {
+  return array.reduce((map, currentItem) => {
+    const key = keySelector(currentItem);
+    const value = valueSelector(currentItem);
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+
+    map.get(key).push(value);
+
+    return map;
+  }, new Map());
 }
 
 /**
